@@ -8,6 +8,7 @@
 /exports/
 /backups/
 /database-backups/
+/dist/
 *.csv
 *.dump
 *.sql.gz

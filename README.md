@@ -20,20 +20,28 @@ Admins can use **Teachers Account → Add user account** to create an individual
 
 Admins can reset an existing teacher password from the teacher directory using the reset-password action. Enter and confirm a temporary password of at least 12 characters; the teacher must change it at next sign-in. Share temporary passwords privately.
 
-## Install with XAMPP
+## Install on Windows
 
-This version uses PHP sessions and MySQL through XAMPP; it no longer connects to Supabase. The database and user accounts are local to the XAMPP server.
+Download **Teacher Load Manager Setup.exe** from the project's GitHub Releases page and run it. The installer requires an existing 64-bit XAMPP installation containing PHP with PDO MySQL and MariaDB/MySQL; XAMPP is not bundled. Select its installation folder when asked (usually `C:\xampp`). Install the app, then launch **Teacher Load Manager** from the Start menu or desktop shortcut. The launcher uses XAMPP's PHP and MariaDB binaries, creates a separate private database under your Windows profile, and creates a dedicated, randomly generated database account with access only to this app's database. It does not use or change XAMPP's existing MySQL database.
+
+Create your first account in the app, then return to the launcher and enter that account's username under **First-time administrator setup**. Select **Make first account administrator**, then sign out and back in to use the admin controls. From there, use **Teachers Account → Add user account** to create individual teacher accounts and share temporary passwords privately.
+
+The desktop launcher binds both the web app and its private database to `127.0.0.1` only; it is not a public website or a school-network server. Keep XAMPP installed because the app uses its PHP and MariaDB binaries. Closing the launcher stops the web server and leaves the app's private database ready for the next launch. Do not expose MySQL to the internet, or port-forward this computer.
+
+Uninstalling removes the launcher and app files but deliberately leaves the database and school records in `%LOCALAPPDATA%\Teacher Load Manager\Database`. Back up important records before removing XAMPP or deleting that folder. If you reinstall the app, it reconnects to the existing private database without replacing saved school data.
+
+## Install from source with XAMPP
+
+For a manual source-code installation, follow the XAMPP steps below. This setup is for local computer use; configure a server separately before any approved school-network deployment.
 
 1. Install XAMPP with Apache, MySQL, PHP, and the PHP PDO MySQL extension.
 2. Copy the project folder into XAMPP's `htdocs`, for example `C:\xampp\htdocs\teacher-load-manager`.
 3. In the XAMPP Control Panel, start **Apache** and **MySQL**.
 4. Open phpMyAdmin at `http://localhost/phpmyadmin`, select **Import**, and import `database-schema.sql`. This creates the `teacher_load_manager` database and its tables.
-5. Copy `db-config.example.php` to `db-config.php` and edit the values for your local database. Create a dedicated MySQL user with a strong password; do not use the default `root` account on a network-accessible server.
-6. Open `http://localhost/teacher-load-manager/` (use the folder name you chose). Do not open `index.html` directly; PHP and the database API must be served by Apache.
-7. Create the first account using **Create a teacher account**. It starts as a teacher. In phpMyAdmin, run `UPDATE users SET role = 'admin' WHERE username = 'YOUR_USERNAME';`, replacing the username. Sign out and back in for the admin role to take effect.
-8. Sign in as admin and use **Teachers Account → Add user account** to create teacher logins. Share temporary passwords privately.
-
-Do not expose phpMyAdmin or MySQL to the internet, port-forward this XAMPP server, or use the default blank-password root account on a network-accessible server. For school-network access, install and secure XAMPP on a designated server, use a dedicated MySQL account, configure Apache/firewall access deliberately, and keep this database/API behind the school network. The browser connects to the PHP API on the same host; MySQL credentials remain in PHP and are not sent to the browser.
+5. Copy `db-config.example.php` to `db-config.php` and edit the values for your local database. Do not use the default `root` account on a network-accessible server.
+6. Open `http://localhost/teacher-load-manager/`. Do not open `index.html` directly; PHP and the database API must be served by Apache.
+7. Create the first teacher account. In phpMyAdmin, run `UPDATE users SET role = 'admin' WHERE username = 'YOUR_USERNAME';`, replacing the username. Sign out and back in for the admin role to take effect.
+8. Sign in as admin and use **Teachers Account → Add user account** to create teacher logins.
 
 ## Records and privacy
 
