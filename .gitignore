@@ -1,0 +1,20 @@
+# Local database and environment credentials
+/db-config.php
+/.env
+/.env.*
+!/.env.example
+
+# School data exports and database backups
+/exports/
+/backups/
+/database-backups/
+*.csv
+*.dump
+*.sql.gz
+*.sql.backup
+*.sql.bak
+
+# Local logs and operating-system files
+*.log
+.DS_Store
+Thumbs.db

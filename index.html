@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#eff6ff">
+    <title>Teacher Load Manager</title>
+    <link rel="stylesheet" href="styles.css?v=20261016-admin-password-reset">
+    <script src="app.js?v=20261016-xampp-mysql" defer></script>
+  </head>
+  <body>
+    <main class="login-screen" id="login-screen">
+      <div class="login-card">
+        <section class="login-welcome" aria-label="Teacher Load Manager">
+          <div class="login-brand">
+            <span class="brand-mark" data-brand-mark aria-hidden="true">TL</span>
+            <span class="brand-copy"><strong>Teacher Load</strong><span>MANAGER</span></span>
+          </div>
+          <div class="login-welcome-copy">
+            <span class="login-welcome-label">SCHOOL PERSONNEL &amp; SCHEDULING</span>
+            <h2>Every class.<br>Every teacher.<br><span>In sync.</span></h2>
+            <p>Keep your teaching loads organized and your school day running smoothly.</p>
+          </div>
+          <div class="login-schedule-card" aria-hidden="true">
+            <div class="login-schedule-top"><span>WEEKLY OVERVIEW</span><span class="login-schedule-dot"></span></div>
+            <div class="login-schedule-days"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span></div>
+            <div class="login-schedule-lines"><i></i><i></i><i></i></div>
+          </div>
+        </section>
+        <form class="login-panel" id="login-form">
+          <div class="login-panel-heading">
+            <div class="eyebrow"><span class="eyebrow-line"></span> WELCOME BACK</div>
+            <h1>Sign in</h1>
+            <p class="login-subtitle">Enter your account details to continue.</p>
+          </div>
+          <label class="field login-field">Email or username<span class="login-input-wrap"><span aria-hidden="true">♙</span><input id="login-email" name="usernameOrEmail" type="text" placeholder="Enter your email or username" autocomplete="username" required autofocus></span></label>
+          <label class="field login-field">Password<span class="login-input-wrap"><span aria-hidden="true">⌑</span><input id="login-password" name="password" type="password" placeholder="Enter your password" autocomplete="current-password" required></span></label>
+          <p class="login-error" id="login-error" role="alert" hidden>Incorrect username or password.</p>
+          <button class="button button-primary login-submit" type="submit">Log in <span aria-hidden="true">→</span></button>
+          <button class="text-button login-account-toggle" id="show-registration" type="button">Create a teacher account</button>
+          <p class="login-privacy"><span aria-hidden="true">▣</span> Sign in with your registered email or, for an account created by an admin, your username. Keep your password private.</p>
+        </form>
+        <form class="login-panel registration-panel" id="registration-form" hidden>
+          <div class="login-panel-heading">
+            <div class="eyebrow"><span class="eyebrow-line"></span> NEW TEACHER</div>
+            <h1>Create account</h1>
+            <p class="login-subtitle">Create an email/password account to add your profile to shared school records.</p>
+          </div>
+          <label class="field login-field">Full name<span class="login-input-wrap"><span aria-hidden="true">♙</span><input id="registration-name" name="name" type="text" maxlength="100" autocomplete="name" required></span></label>
+          <label class="field login-field">Employee ID <span>(optional)</span><span class="login-input-wrap"><span aria-hidden="true">#</span><input id="registration-employee-id" name="employeeId" type="text" maxlength="40"></span></label>
+          <label class="field login-field">Position / designation <span>(optional)</span><span class="login-input-wrap"><span aria-hidden="true">▤</span><input id="registration-position" name="position" type="text" maxlength="80" placeholder="e.g. Teacher III"></span></label>
+          <label class="field login-field">Email<span class="login-input-wrap"><span aria-hidden="true">@</span><input id="registration-email" name="email" type="email" autocomplete="email" required></span></label>
+          <label class="field login-field">Username<span class="login-input-wrap"><span aria-hidden="true">♙</span><input id="registration-username" name="username" type="text" maxlength="40" autocomplete="username" pattern="[a-zA-Z0-9._\-]{3,40}" title="Use 3–40 letters, numbers, periods, underscores, or hyphens." required></span></label>
+          <label class="field login-field">Password <span>(at least 8 characters)</span><span class="login-input-wrap"><span aria-hidden="true">⌑</span><input id="registration-password" name="password" type="password" minlength="8" autocomplete="new-password" required></span></label>
+          <label class="field login-field">Confirm password<span class="login-input-wrap"><span aria-hidden="true">⌑</span><input id="registration-confirm-password" name="confirmPassword" type="password" minlength="8" autocomplete="new-password" required></span></label>
+          <p class="login-error" id="registration-error" role="alert" hidden></p>
+          <button class="button button-primary login-submit" type="submit">Create account <span aria-hidden="true">→</span></button>
+          <button class="text-button login-account-toggle" id="show-login" type="button">Already have an account? Sign in</button>
+          <p class="login-privacy"><span aria-hidden="true">▣</span> The administrator will review school records. Use a unique password and don't share your login details.</p>
+        </form>
+        <form class="login-panel" id="initial-password-form" hidden>
+          <div class="login-panel-heading">
+            <div class="eyebrow"><span class="eyebrow-line"></span> ACCOUNT SECURITY</div>
+            <h1>Set your password</h1>
+            <p class="login-subtitle">Your administrator created a temporary password. Choose a new password to continue.</p>
+          </div>
+          <label class="field login-field">New password <span>(at least 12 characters)</span><span class="login-input-wrap"><span aria-hidden="true">⌑</span><input id="initial-new-password" name="newPassword" type="password" minlength="12" autocomplete="new-password" required></span></label>
+          <label class="field login-field">Confirm new password<span class="login-input-wrap"><span aria-hidden="true">⌑</span><input id="initial-confirm-password" name="confirmPassword" type="password" minlength="12" autocomplete="new-password" required></span></label>
+          <p class="login-error" id="initial-password-error" role="alert" hidden></p>
+          <button class="button button-primary login-submit" type="submit">Save new password <span aria-hidden="true">→</span></button>
+          <button class="text-button login-account-toggle" id="initial-password-signout" type="button">Sign out</button>
+        </form>
+      </div>
+    </main>
+    <div class="app-shell" id="app-shell" hidden>
+      <aside class="sidebar" id="sidebar">
+        <a class="brand" href="#overview" aria-label="Teacher Load Manager home">
+          <span class="brand-mark" data-brand-mark aria-hidden="true">TL</span>
+          <span class="brand-copy"><strong>Teacher Load</strong><span>MANAGER</span></span>
+        </a>
+
+        <div class="sidebar-label">WORKSPACE</div>
+        <nav class="main-nav" aria-label="Main navigation">
+          <button class="nav-link active" data-view="overview" type="button">
+            <span class="nav-icon" aria-hidden="true">◫</span> Overview
+          </button>
+          <button class="nav-link" data-view="loads" type="button">
+            <span class="nav-icon" aria-hidden="true">▤</span> Teaching loads
+            <span class="nav-count" id="load-nav-count">0</span>
+          </button>
+          <button class="nav-link" data-view="substitutions" type="button">
+            <span class="nav-icon" aria-hidden="true">⇄</span> Substitution plans
+          </button>
+          <button class="nav-link" id="open-groups-periods" type="button">
+            <span class="nav-icon" aria-hidden="true">◷</span> Groups &amp; periods
+          </button>
+        </nav>
+        <div class="sidebar-label sidebar-label-secondary" id="sidebar-management-label">MANAGEMENT</div>
+        <nav class="main-nav" id="nav-management" aria-label="Management">
+          <button class="nav-link" id="nav-teachers" data-view="teachers" type="button">
+            <span class="nav-icon" aria-hidden="true">♙</span> Teachers Account
+            <span class="nav-count" id="teacher-nav-count">0</span>
+          </button>
+          <button class="nav-link" id="sidebar-open-settings" type="button">
+            <span class="nav-icon" aria-hidden="true">⚙</span> Settings
+          </button>
+        </nav>
+
+        <div class="sidebar-bottom">
+          <button class="button button-secondary logout-button" id="logout-button" type="button">Log out</button>
+          <div class="help-card">
+            <span class="help-icon" aria-hidden="true">i</span>
+            <strong>Keep your records handy</strong>
+            <p>Your records are stored in this XAMPP server's MySQL database. Export a backup regularly.</p>
+            <button class="text-button" id="sidebar-export" type="button">Export records <span aria-hidden="true">→</span></button>
+          </div>
+          <div class="sidebar-foot">TEACHER LOAD MANAGER <span>·</span> SCHOOL RECORDS</div>
+        </div>
+      </aside>
+
+      <main class="main-area">
+        <header class="topbar">
+          <button class="mobile-menu" id="mobile-menu" type="button" aria-label="Open navigation">☰</button>
+          <div class="breadcrumb"><span>Workspace</span><span class="crumb-separator">/</span><strong id="breadcrumb-current">Overview</strong></div>
+          <div class="topbar-actions">
+            <div class="school-context">
+              <span class="school-dot" aria-hidden="true"></span>
+              <span id="school-context-name">My School</span>
+              <span class="school-divider"></span>
+              <span id="school-context-year">2026–2027</span>
+            </div>
+            <button class="icon-button settings-button" id="open-settings" type="button" aria-label="School settings" title="School settings">⚙</button>
+          </div>
+        </header>
+
+        <div class="page-content">
+          <section class="print-branding" id="print-branding" aria-hidden="true">
+            <img id="print-school-logo" alt="">
+            <div class="print-branding-details">
+              <strong id="print-school-name"></strong>
+              <span id="print-school-address"></span>
+              <span id="print-school-id"></span>
+              <span id="print-principal"></span>
+            </div>
+          </section>
+          <section class="view-panel active" id="view-overview" aria-labelledby="page-title">
+            <div class="page-heading">
+              <div>
+                <div class="eyebrow"><span class="eyebrow-line"></span> <span id="overview-eyebrow-label">SCHOOL PERSONNEL</span></div>
+                <h1 id="page-title">Good day. <span class="wave" aria-hidden="true">✳</span></h1>
+                <p class="page-subtitle">A clear view of your teachers and their teaching assignments.</p>
+              </div>
+              <div class="heading-actions">
+                <button class="button button-secondary" data-add-teacher type="button"><span aria-hidden="true">＋</span> Add user account</button>
+                <button class="button button-secondary" id="print-overview" type="button"><span aria-hidden="true">⎙</span> Print</button>
+                <button class="button button-primary" id="quick-add-load" type="button"><span aria-hidden="true">＋</span> Add teaching load</button>
+              </div>
+            </div>
+
+            <div class="stat-grid" aria-label="School summary">
+              <article class="stat-card">
+                <div class="stat-top"><span class="stat-label">Total teachers</span><span class="stat-icon icon-green" aria-hidden="true">♙</span></div>
+                <div class="stat-value" id="stat-teachers">0</div>
+                <div class="stat-caption">Profiles in your school records</div>
+              </article>
+              <article class="stat-card">
+                <div class="stat-top"><span class="stat-label">Teaching assignments</span><span class="stat-icon icon-blue" aria-hidden="true">▤</span></div>
+                <div class="stat-value" id="stat-loads">0</div>
+                <div class="stat-caption">Across all teacher profiles</div>
+              </article>
+              <article class="stat-card">
+                <div class="stat-top"><span class="stat-label">Weekly teaching minutes</span><span class="stat-icon icon-amber" aria-hidden="true">◷</span></div>
+                <div class="stat-value" id="stat-minutes">0<span class="stat-unit"> min</span></div>
+                <div class="stat-caption">Combined minutes per week</div>
+              </article>
+            </div>
+
+            <div class="content-grid">
+              <section class="panel recent-panel" aria-labelledby="recent-title">
+                <div class="panel-heading">
+                  <div><h2 id="recent-title">Teaching assignments</h2><p class="panel-subtitle">A quick look at your latest records</p></div>
+                  <button class="text-button" data-go="loads" type="button">View all <span aria-hidden="true">→</span></button>
+                </div>
+                <div class="table-wrap">
+                  <table>
+                    <thead><tr><th>TEACHER</th><th>LEARNING AREA</th><th>GRADE &amp; SECTION</th><th>GROUP NAME</th><th>PERIOD &amp; TIME</th><th>DAYS</th><th>MINUTES / WEEK</th></tr></thead>
+                    <tbody id="recent-loads-body"></tbody>
+                  </table>
+                  <div class="empty-state compact-empty" id="recent-empty">
+                    <span class="empty-icon" aria-hidden="true">▤</span>
+                    <strong>No teaching loads yet</strong>
+                    <p>Add an assignment to see it here.</p>
+                    <button class="button button-secondary button-small" data-add-load type="button">Add first assignment</button>
+                  </div>
+                </div>
+              </section>
+
+              <aside class="panel getting-started">
+                <div class="start-illustration" aria-hidden="true"><span class="start-sun"></span><span class="start-leaf leaf-one"></span><span class="start-leaf leaf-two"></span><span class="start-page"></span><span class="start-pencil"></span></div>
+                <div class="eyebrow">GETTING STARTED</div>
+                <h2>Set up your school records</h2>
+                <p>Add your teacher profiles first, then record each learning area and class assignment.</p>
+                <div class="setup-steps">
+                  <button class="setup-step" data-go="teachers" type="button"><span class="step-number">1</span><span><strong>Add teachers</strong><small>Create a profile for each teacher</small></span><span class="step-arrow">→</span></button>
+                  <button class="setup-step" data-add-load type="button"><span class="step-number">2</span><span><strong>Assign teaching loads</strong><small>Connect classes and learning areas</small></span><span class="step-arrow">→</span></button>
+                </div>
+              </aside>
+            </div>
+            <p class="privacy-note"><span aria-hidden="true">⌑</span> Teaching and school records are stored in the school's local MySQL database.</p>
+          </section>
+
+          <section class="view-panel" id="view-teachers" aria-labelledby="teachers-title">
+            <div class="page-heading">
+              <div>
+                <div class="eyebrow"><span class="eyebrow-line"></span> <span id="teacher-page-eyebrow">SCHOOL PERSONNEL</span></div>
+                <h1 id="teachers-title">Teachers</h1>
+                <p class="page-subtitle" id="teacher-page-subtitle">Manage teacher profiles and review their assigned minutes.</p>
+              </div>
+              <div class="heading-actions"><button class="button button-primary" id="add-teacher" type="button"><span aria-hidden="true">＋</span> Add user account</button></div>
+            </div>
+            <div class="teacher-dashboard-links" aria-label="Teacher dashboard shortcuts">
+              <button class="teacher-dashboard-card" data-go="loads" type="button">
+                <span class="teacher-dashboard-icon" aria-hidden="true">▤</span>
+                <span class="teacher-dashboard-copy"><strong>Teaching loads</strong><small id="teacher-load-shortcut-copy">View and manage teacher assignments</small></span>
+                <span class="teacher-dashboard-count" id="teacher-dashboard-load-count">0 assignments</span>
+                <span class="teacher-dashboard-arrow" aria-hidden="true">→</span>
+              </button>
+              <button class="teacher-dashboard-card" data-go="substitutions" type="button">
+                <span class="teacher-dashboard-icon" aria-hidden="true">⇄</span>
+                <span class="teacher-dashboard-copy"><strong>Substitution plans</strong><small id="teacher-substitution-shortcut-copy">Review and manage staff coverage</small></span>
+                <span class="teacher-dashboard-count" id="teacher-dashboard-substitution-count">0 plans</span>
+                <span class="teacher-dashboard-arrow" aria-hidden="true">→</span>
+              </button>
+            </div>
+            <section class="panel list-panel">
+              <div class="list-toolbar">
+                <div><h2 id="teacher-list-title">Teacher directory</h2><p class="panel-subtitle" id="teacher-list-caption">0 teacher profiles</p></div>
+                <label class="search-box"><span aria-hidden="true">⌕</span><input id="teacher-search" type="search" placeholder="Search teachers..." aria-label="Search teachers"></label>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>TEACHER</th><th>EMPLOYEE ID</th><th>POSITION</th><th>ASSIGNMENTS</th><th>MINUTES / WEEK</th><th>STATUS</th><th><span class="sr-only">Actions</span></th></tr></thead>
+                  <tbody id="teachers-body"></tbody>
+                </table>
+                <div class="empty-state" id="teachers-empty"><span class="empty-icon" aria-hidden="true">♙</span><strong>No teachers to show</strong><p>Create a teacher account to get started.</p><button class="button button-primary button-small" data-add-teacher type="button">Add user account</button></div>
+              </div>
+            </section>
+            <section class="panel list-panel account-activity-panel">
+              <div class="list-toolbar">
+                <div><h2>Account sign-in history</h2><p class="panel-subtitle" id="account-login-caption">Sign-in history is not collected</p></div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>DATE AND TIME</th><th>USERNAME</th><th>EVENT</th></tr></thead>
+                  <tbody id="account-login-body"></tbody>
+                </table>
+                <div class="empty-state" id="account-login-empty"><span class="empty-icon" aria-hidden="true">◷</span><strong>Sign-in history is not collected</strong><p>The local MySQL database stores account profiles and school records, but not sign-in events.</p></div>
+              </div>
+            </section>
+          </section>
+
+          <section class="view-panel" id="view-loads" aria-labelledby="loads-title">
+            <div class="page-heading">
+              <div>
+                <div class="eyebrow"><span class="eyebrow-line"></span> SCHOOL PERSONNEL</div>
+                <h1 id="loads-title">Teaching loads</h1>
+                <p class="page-subtitle">Loads are arranged by teacher, weekday, and scheduled start time.</p>
+              </div>
+              <div class="heading-actions">
+                <button class="button button-secondary" id="export-loads" type="button"><span aria-hidden="true">↓</span> Export CSV</button>
+                <button class="button button-primary" id="add-load" type="button"><span aria-hidden="true">＋</span> Add teaching load</button>
+              </div>
+            </div>
+            <section class="panel list-panel">
+              <div class="list-toolbar">
+                <div><h2>Assignment directory</h2><p class="panel-subtitle" id="load-list-caption">0 teaching assignments</p></div>
+                <label class="search-box"><span aria-hidden="true">⌕</span><input id="load-search" type="search" placeholder="Search assignments..." aria-label="Search assignments"></label>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>TEACHER</th><th>LEARNING AREA</th><th>GRADE &amp; SECTION</th><th>GROUP NAME</th><th>PERIOD &amp; TIME</th><th>SCHEDULE</th><th>DAYS</th><th>MINUTES / WEEK</th><th><span class="sr-only">Actions</span></th></tr></thead>
+                  <tbody id="loads-body"></tbody>
+                </table>
+                <div class="empty-state" id="loads-empty"><span class="empty-icon" aria-hidden="true">▤</span><strong>No assignments to show</strong><p>Add a teaching load to get started.</p><button class="button button-primary button-small" data-add-load type="button">Add teaching load</button></div>
+              </div>
+            </section>
+          </section>
+
+          <section class="view-panel" id="view-substitutions" aria-labelledby="substitutions-title">
+            <div class="page-heading">
+              <div>
+                <div class="eyebrow"><span class="eyebrow-line"></span> STAFF COVERAGE</div>
+                <h1 id="substitutions-title">Substitution plans</h1>
+                <p class="page-subtitle">Assign available teachers to cover selected loads during leave.</p>
+              </div>
+              <div class="heading-actions">
+                <button class="button button-secondary" id="apply-for-leave" type="button" hidden><span aria-hidden="true">＋</span> Apply for leave</button>
+                <button class="button button-primary" id="add-substitution-plan" type="button"><span aria-hidden="true">＋</span> Create substitution plan</button>
+              </div>
+            </div>
+            <p class="privacy-note" id="teacher-substitution-note" hidden>Apply for leave by selecting a date range. Once the admin approves your application, your profile will be marked On leave and you can submit a coverage proposal.</p>
+            <section class="panel list-panel" id="leave-applications-panel">
+              <div class="list-toolbar">
+                <div><h2>Leave applications</h2><p class="panel-subtitle" id="leave-application-caption">0 leave applications</p></div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>TEACHER</th><th>DATE OF LEAVE</th><th>APPLIED ON</th><th>STATUS</th><th><span class="sr-only">Actions</span></th></tr></thead>
+                  <tbody id="leave-applications-body"></tbody>
+                </table>
+                <div class="empty-state" id="leave-applications-empty"><span class="empty-icon" aria-hidden="true">◷</span><strong>No leave applications yet</strong><p>Apply for leave by selecting the date range you will be away.</p></div>
+              </div>
+            </section>
+            <section class="panel list-panel">
+              <div class="list-toolbar">
+                <div><h2>Coverage plans</h2><p class="panel-subtitle" id="substitution-plan-caption">0 substitution plans</p></div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>TEACHER ON LEAVE</th><th>SUBSTITUTE TEACHER</th><th>LEAVE DATES</th><th>LOADS TO COVER</th><th>STATUS</th><th><span class="sr-only">Actions</span></th></tr></thead>
+                  <tbody id="substitution-plans-body"></tbody>
+                </table>
+                <div class="empty-state" id="substitution-plans-empty"><span class="empty-icon" aria-hidden="true">⇄</span><strong>No substitution plans yet</strong><p>Create a plan to assign teaching loads to an available teacher.</p><button class="button button-primary button-small" data-add-substitution-plan type="button">Create substitution plan</button></div>
+              </div>
+            </section>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <div class="sidebar-scrim" id="sidebar-scrim"></div>
+    <div class="toast-region" id="toast-region" role="status" aria-live="polite"></div>
+    <section class="substitution-print-sheet" id="substitution-print-sheet" aria-hidden="true">
+      <header class="substitution-print-branding">
+        <img id="substitution-print-logo" alt="">
+        <div><strong id="substitution-print-school-name"></strong><span id="substitution-print-school-address"></span><span id="substitution-print-school-id"></span></div>
+      </header>
+      <h1>Substitution plan</h1>
+      <p id="substitution-print-summary"></p>
+      <table>
+        <thead><tr><th>Learning area</th><th>Grade &amp; section</th><th>Group</th><th>Period &amp; time</th><th>Days</th></tr></thead>
+        <tbody id="substitution-print-loads"></tbody>
+      </table>
+      <p class="substitution-print-principal" id="substitution-print-principal"><strong id="substitution-print-principal-name"></strong><span id="substitution-print-principal-designation"></span></p>
+    </section>
+
+    <dialog class="form-dialog" id="teacher-dialog" aria-labelledby="teacher-dialog-title">
+      <form id="teacher-form">
+        <div class="dialog-heading"><div><div class="eyebrow">SCHOOL PERSONNEL</div><h2 id="teacher-dialog-title">Add teacher account</h2><p id="teacher-dialog-description">Create a teacher login and profile. Give the temporary password to the teacher securely.</p></div><button class="dialog-close" type="button" data-close-dialog aria-label="Close">×</button></div>
+        <input id="teacher-id" type="hidden">
+        <div class="form-grid">
+          <label class="field field-full">Full name <span class="required">*</span><input id="teacher-name" name="name" type="text" maxlength="100" placeholder="e.g. Maria Santos" required></label>
+          <label class="field field-full" id="teacher-username-field">Username <span class="required">*</span><span>(the teacher uses this to sign in; no email is needed)</span><input id="teacher-username" name="username" type="text" maxlength="40" pattern="[a-zA-Z0-9._\-]{3,40}" title="Use 3–40 letters, numbers, periods, underscores, or hyphens." autocomplete="username" placeholder="e.g. maria.santos" required></label>
+          <label class="field" id="teacher-temp-password-field">Password <span class="required">*</span><span>(temporary; at least 12 characters)</span><input id="teacher-temp-password" name="temporaryPassword" type="password" minlength="12" autocomplete="new-password" placeholder="Enter a temporary password" required></label>
+          <label class="field" id="teacher-confirm-password-field">Confirm temporary password<input id="teacher-confirm-password" name="confirmPassword" type="password" minlength="12" autocomplete="new-password" required></label>
+          <label class="field">Employee ID<input id="teacher-employee-id" name="employeeId" type="text" maxlength="40" placeholder="e.g. 1234567"></label>
+          <label class="field">Position / designation<input id="teacher-position" name="position" type="text" maxlength="80" placeholder="e.g. Teacher III"></label>
+          <label class="field" id="teacher-status-field">Employment status<select id="teacher-status" name="status"><option value="Active">Active</option><option value="On leave">On leave</option><option value="Inactive">Inactive</option></select></label>
+        </div>
+        <p class="login-error" id="teacher-form-error" role="alert" hidden></p>
+        <div class="dialog-actions"><button class="button button-secondary" type="button" data-close-dialog>Cancel</button><button class="button button-primary" id="teacher-form-submit" type="submit">Create teacher account</button></div>
+      </form>
+    </dialog>
+
+    <dialog class="form-dialog" id="teacher-password-dialog" aria-labelledby="teacher-password-title">
+      <form id="teacher-password-form">
+        <div class="dialog-heading"><div><div class="eyebrow">ACCOUNT SECURITY</div><h2 id="teacher-password-title">Reset teacher password</h2><p>Set a temporary password for <strong id="teacher-password-name"></strong>. They will be required to change it at their next sign-in.</p></div><button class="dialog-close" type="button" data-close-dialog aria-label="Close">×</button></div>
+        <input id="teacher-password-id" type="hidden">
+        <div class="form-grid">
+          <label class="field field-full">Temporary password <span class="required">*</span><span>(12–128 characters)</span><input id="teacher-new-password" name="newPassword" type="password" minlength="12" maxlength="128" autocomplete="new-password" required></label>
+          <label class="field field-full">Confirm temporary password <span class="required">*</span><input id="teacher-confirm-new-password" name="confirmNewPassword" type="password" minlength="12" maxlength="128" autocomplete="new-password" required></label>
+        </div>
+        <p class="login-error" id="teacher-password-error" role="alert" hidden></p>
+        <div class="dialog-actions"><button class="button button-secondary" type="button" data-close-dialog>Cancel</button><button class="button button-primary" type="submit">Reset password</button></div>
+      </form>
+    </dialog>
+
+    <dialog class="form-dialog" id="load-dialog" aria-labelledby="load-dialog-title">
+      <form id="load-form">
+        <div class="dialog-heading"><div><div class="eyebrow">TEACHING ASSIGNMENT</div><h2 id="load-dialog-title">Add teaching load</h2><p>Enter a class assignment and its weekly minutes.</p></div><button class="dialog-close" type="button" data-close-dialog aria-label="Close">×</button></div>
+        <input id="load-id" type="hidden">
+        <div class="auto-generate-card" id="auto-generate-card">
+          <strong>Automatic assignment recording is on</strong>
+          <p>Choose a period and time below for one assignment, or leave it unselected to create an assignment for every group in Periods 1–7.</p>
+        </div>
+        <div class="form-grid">
+          <label class="field field-full">Teacher <span class="required">*</span><select id="load-teacher" name="teacherId" required></select></label>
+          <label class="field field-full">Learning area <span class="required">*</span><input id="load-subject" name="subject" type="text" maxlength="100" placeholder="e.g. Mathematics" required></label>
+          <label class="field">Grade level <span class="required">*</span><select id="load-grade" name="grade" required><option value="">Select grade</option><option>Kindergarten</option><option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option><option>Other</option></select></label>
+          <label class="field">Section<input id="load-section" name="section" type="text" maxlength="60" placeholder="e.g. Sampaguita"></label>
+          <fieldset class="field field-full days-field">
+            <legend>Days of the week</legend>
+            <div class="weekday-options">
+              <label><input type="checkbox" name="days" value="Monday"> Monday</label>
+              <label><input type="checkbox" name="days" value="Tuesday"> Tuesday</label>
+              <label><input type="checkbox" name="days" value="Wednesday"> Wednesday</label>
+              <label><input type="checkbox" name="days" value="Thursday"> Thursday</label>
+              <label><input type="checkbox" name="days" value="Friday"> Friday</label>
+            </div>
+          </fieldset>
+          <div class="form-grid field-full single-assignment-fields" id="single-assignment-fields" hidden>
+            <label class="field">Group name<select id="load-group-name" name="groupName" required><option value="">Select group</option></select></label>
+            <label class="field">Period <span class="required">*</span><select id="load-period" name="period"><option value="">Select period</option><option value="1">Period 1</option><option value="2">Period 2</option><option value="3">Period 3</option><option value="4">Period 4</option><option value="5">Period 5</option><option value="6">Period 6</option><option value="7">Period 7</option></select></label>
+          </div>
+          <label class="field">Minutes per week <span class="required">*</span><input id="load-minutes" name="minutes" type="number" min="1" max="10080" step="1" placeholder="e.g. 300" required></label>
+          <label class="field">Period and time <span class="optional">(all configured groups and periods)</span><select id="load-schedule" name="schedule" aria-describedby="load-schedule-hint"><option value="">Select a group, period, and time</option></select><small class="field-hint" id="load-schedule-hint"></small></label>
+        </div>
+        <div class="dialog-actions"><button class="button button-secondary" id="preview-teacher-load" type="button" hidden>Preview teacher loads</button><button class="button button-secondary" type="button" data-close-dialog>Cancel</button><button class="button button-secondary" id="save-add-another-load" type="submit" name="intent" value="add-another" hidden>Save &amp; add another load</button><button class="button button-primary" type="submit">Save assignment</button></div>
+      </form>
+    </dialog>
+
+    <dialog class="form-dialog substitution-dialog" id="substitution-dialog" aria-labelledby="substitution-dialog-title">
+      <form id="substitution-form">
+        <div class="dialog-heading"><div><div class="eyebrow">STAFF COVERAGE</div><h2 id="substitution-dialog-title">Create substitution plan</h2><p>Select a teacher on leave, an available substitute, and the loads to cover.</p></div><button class="dialog-close" type="button" data-close-dialog aria-label="Close">×</button></div>
+        <div class="form-grid">
+          <label class="field field-full">Teacher on leave <span class="required">*</span><select id="substitution-leave-teacher" name="leaveTeacherId" required></select><span class="substitution-leave-help" id="substitution-leave-help" hidden>No teachers are marked On leave. Update a teacher's status before creating this plan. <button class="text-button" id="manage-leave-teachers" type="button">Go to Teachers</button></span></label>
+          <div class="field-full substitution-load-filters">
+            <label class="field">Group<select id="substitution-group-filter" aria-label="Filter by group"></select></label>
+            <label class="field">Period<select id="substitution-period-filter" aria-label="Filter by period"></select></label>
+          </div>
+          <label class="field field-full">Available substitute teacher <span class="required">*</span><select id="substitution-cover-teacher" name="substituteTeacherId" required></select><small class="field-hint">With All periods selected, teachers free for at least one period are listed. Choose a specific period or load to check availability for that time.</small></label>
+          <label class="field">Leave starts <span class="required">*</span><input id="substitution-start-date" name="startDate" type="date" required></label>
+          <label class="field">Leave ends <span class="required">*</span><input id="substitution-end-date" name="endDate" type="date" required></label>
+          <fieldset class="field field-full substitution-loads-field">
+            <legend>Teaching loads to cover <span class="required">*</span></legend>
+            <div class="substitution-load-options" id="substitution-load-options"></div>
+            <small class="field-hint" id="substitution-load-hint">Choose a teacher on leave and substitute to check matching group, period, time, and weekday availability.</small>
+          </fieldset>
+        </div>
+        <div class="dialog-actions"><button class="button button-secondary" id="print-substitution-plan" type="button">Print plan</button><button class="button button-secondary" type="button" data-close-dialog>Cancel</button><button class="button button-primary" type="submit">Save substitution plan</button></div>
+      </form>
+    </dialog>
+
+    <dialog class="form-dialog" id="leave-application-dialog" aria-labelledby="leave-application-title">
+      <form id="leave-application-form">
+        <div class="dialog-heading"><div><div class="eyebrow">LEAVE REQUEST</div><h2 id="leave-application-title">Apply for leave</h2><p>Select the date range you will be away. Your application will be sent to the admin for review.</p></div><button class="dialog-close" type="button" data-close-dialog aria-label="Close">×</button></div>
+        <div class="form-grid">
+          <label class="field">Leave starts <span class="required">*</span><input id="leave-application-start-date" name="startDate" type="date" required></label>
+          <label class="field">Leave ends <span class="required">*</span><input id="leave-application-end-date" name="endDate" type="date" required></label>
+        </div>
+        <div class="dialog-actions"><button class="button button-secondary" type="button" data-close-dialog>Cancel</button><button class="button button-primary" type="submit">Submit leave application</button></div>
+      </form>
+    </dialog>
+
+    <dialog class="form-dialog preview-dialog substitution-plan-preview" id="substitution-plan-preview" aria-labelledby="substitution-plan-preview-title">
+      <div class="dialog-content">
+        <div class="dialog-heading"><div><div class="eyebrow">STAFF COVERAGE</div><h2 id="substitution-plan-preview-title">Substitution plan preview</h2><p id="substitution-plan-preview-summary"></p></div><button class="dialog-close" type="button" data-close-dialog aria-label="Close">×</button></div>
+        <div class="table-wrap preview-table-wrap">
+          <table>
+            <thead><tr><th>LEARNING AREA</th><th>GRADE &amp; SECTION</th><th>GROUP</th><th>PERIOD &amp; TIME</th><th>DAYS</th></tr></thead>
+            <tbody id="substitution-plan-preview-loads"></tbody>
+          </table>
+        </div>
+        <div class="dialog-actions"><button class="button button-secondary" type="button" data-close-dialog>Close</button><button class="button button-primary" id="print-saved-substitution-plan" type="button">Print this plan</button></div>
+      </div>
+    </dialog>
+
+    <dialog class="form-dialog preview-dialog" id="teacher-load-preview" aria-labelledby="teacher-load-preview-title">
+      <div class="dialog-content">
+        <div class="dialog-heading"><div><div class="eyebrow">TEACHER LOAD PREVIEW</div><h2 id="teacher-load-preview-title">Teaching loads</h2><p id="teacher-load-preview-subtitle"></p></div><button class="dialog-close" type="button" data-close-dialog aria-label="Close">×</button></div>
+        <div class="preview-summary" id="teacher-load-preview-summary"></div>
+        <div class="table-wrap preview-table-wrap">
+          <table>
+            <thead><tr><th>LEARNING AREA</th><th>GRADE &amp; SECTION</th><th>GROUP</th><th>PERIOD &amp; TIME</th><th>DAYS</th><th>MINUTES / WEEK</th><th><span class="sr-only">Actions</span></th></tr></thead>
+            <tbody id="teacher-load-preview-body"></tbody>
+          </table>
+          <p class="preview-empty" id="teacher-load-preview-empty" hidden>No teaching loads have been recorded for this teacher.</p>
+        </div>
+        <div class="dialog-actions"><button class="button button-secondary" type="button" data-close-dialog>Close preview</button></div>
+      </div>
+    </dialog>
+
+    <dialog class="form-dialog settings-dialog" id="settings-dialog" aria-labelledby="settings-dialog-title">
+      <form id="settings-form">
+        <div class="dialog-heading"><div><div class="eyebrow">WORKSPACE SETTINGS</div><h2 id="settings-dialog-title">School, group &amp; period settings</h2><p>Manage school branding, groups, and period schedules.</p></div><button class="dialog-close" type="button" data-close-dialog aria-label="Close">×</button></div>
+        <div class="form-grid">
+          <label class="field field-full">School name<input id="setting-school" name="schoolName" type="text" maxlength="120" placeholder="My School"></label>
+          <label class="field field-full">School address<input id="setting-school-address" name="schoolAddress" type="text" maxlength="200" placeholder="School street, barangay, municipality"></label>
+          <label class="field">School ID<input id="setting-school-id" name="schoolId" type="text" maxlength="40" placeholder="e.g. 123456"></label>
+          <label class="field field-full">School year<input id="setting-year" name="schoolYear" type="text" maxlength="30" placeholder="2026–2027"></label>
+          <label class="field">Principal's name<input id="setting-principal-name" name="principalName" type="text" maxlength="120" placeholder="Full name"></label>
+          <label class="field">Principal's designation<input id="setting-principal-designation" name="principalDesignation" type="text" maxlength="100" placeholder="e.g. School Principal"></label>
+          <div class="field field-full school-logo-field">
+            <label class="field" for="setting-school-logo">School logo</label>
+            <div class="school-logo-controls">
+              <img id="setting-school-logo-preview" alt="Current school logo" hidden>
+              <input id="setting-school-logo" name="schoolLogo" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+              <button class="button button-secondary button-small" id="remove-school-logo" type="button" hidden>Remove logo</button>
+            </div>
+            <small class="field-hint">Choose a PNG, JPG, WebP, or GIF image up to 1 MB. The logo is saved with the shared school records.</small>
+            <input id="setting-remove-school-logo" type="checkbox" hidden>
+          </div>
+        </div>
+        <section class="group-names-field" aria-labelledby="group-names-title">
+          <div class="period-settings-heading"><h3 id="group-names-title">Group names</h3><span>Choose and manage groups</span></div>
+          <div class="group-name-controls">
+            <label class="field">Available groups<select id="setting-group-names" aria-label="Available group names"></select></label>
+            <button class="button button-secondary button-small" id="remove-group-name" type="button">Remove selected</button>
+          </div>
+          <div class="add-group-controls">
+            <label class="field">Add a group name<input id="new-group-name" type="text" maxlength="80" placeholder="e.g. Morning shift"></label>
+            <button class="button button-secondary button-small" id="add-group-name" type="button">Add group</button>
+          </div>
+        </section>
+        <label class="auto-record-setting" for="setting-auto-record">
+          <input id="setting-auto-record" type="checkbox">
+          <span><strong>Automatically record all groups and periods</strong><small>When adding a teaching load, create an assignment for every group above in Periods 1–7.</small></span>
+        </label>
+        <section class="period-settings" aria-labelledby="period-settings-title">
+          <div class="period-settings-heading"><h3 id="period-settings-title">Period times</h3><span>Set times for each group</span></div>
+          <label class="field period-group-selector">Group<select id="setting-period-group" aria-label="Group for period times"></select></label>
+          <div class="period-time-grid"><span></span><span>START</span><span>END</span></div>
+          <div class="period-time-list">
+            <label class="period-time-row"><span>Period 1</span><input type="time" data-period-start="1" aria-label="Period 1 start time"><input type="time" data-period-end="1" aria-label="Period 1 end time"></label>
+            <label class="period-time-row"><span>Period 2</span><input type="time" data-period-start="2" aria-label="Period 2 start time"><input type="time" data-period-end="2" aria-label="Period 2 end time"></label>
+            <label class="period-time-row"><span>Period 3</span><input type="time" data-period-start="3" aria-label="Period 3 start time"><input type="time" data-period-end="3" aria-label="Period 3 end time"></label>
+            <label class="period-time-row"><span>Period 4</span><input type="time" data-period-start="4" aria-label="Period 4 start time"><input type="time" data-period-end="4" aria-label="Period 4 end time"></label>
+            <label class="period-time-row"><span>Period 5</span><input type="time" data-period-start="5" aria-label="Period 5 start time"><input type="time" data-period-end="5" aria-label="Period 5 end time"></label>
+            <label class="period-time-row"><span>Period 6</span><input type="time" data-period-start="6" aria-label="Period 6 start time"><input type="time" data-period-end="6" aria-label="Period 6 end time"></label>
+            <label class="period-time-row"><span>Period 7</span><input type="time" data-period-start="7" aria-label="Period 7 start time"><input type="time" data-period-end="7" aria-label="Period 7 end time"></label>
+          </div>
+        </section>
+        <section class="group-names-field" aria-labelledby="legacy-import-title">
+          <div class="period-settings-heading"><h3 id="legacy-import-title">Import old browser records</h3></div>
+          <p class="field-hint">Adds this browser's saved teacher, assignment, leave, and coverage records to this MySQL database without replacing existing records. Old account passwords are not transferred; teachers must create new accounts.</p>
+          <button class="button button-secondary button-small" id="import-legacy-records" type="button">Import records from this browser</button>
+        </section>
+        <div class="dialog-actions"><button class="button button-secondary" type="button" data-close-dialog>Cancel</button><button class="button button-primary" type="submit">Save details</button></div>
+      </form>
+    </dialog>
+  </body>
+</html>

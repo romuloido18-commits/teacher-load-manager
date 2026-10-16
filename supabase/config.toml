@@ -1,0 +1,5 @@
+[functions.admin-create-teacher]
+verify_jwt = true
+
+[functions.admin-reset-teacher-password]
+verify_jwt = true
