@@ -5,74 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#eff6ff">
     <title>Teacher Load Manager</title>
-    <link rel="stylesheet" href="styles.css?v=20261016-admin-password-reset">
-    <script src="app.js?v=20261016-xampp-mysql" defer></script>
+    <link rel="stylesheet" href="styles.css?v=20261017-local-only">
+    <script src="app.js?v=20261017-local-only" defer></script>
   </head>
   <body>
-    <main class="login-screen" id="login-screen">
-      <div class="login-card">
-        <section class="login-welcome" aria-label="Teacher Load Manager">
-          <div class="login-brand">
-            <span class="brand-mark" data-brand-mark aria-hidden="true">TL</span>
-            <span class="brand-copy"><strong>Teacher Load</strong><span>MANAGER</span></span>
-          </div>
-          <div class="login-welcome-copy">
-            <span class="login-welcome-label">SCHOOL PERSONNEL &amp; SCHEDULING</span>
-            <h2>Every class.<br>Every teacher.<br><span>In sync.</span></h2>
-            <p>Keep your teaching loads organized and your school day running smoothly.</p>
-          </div>
-          <div class="login-schedule-card" aria-hidden="true">
-            <div class="login-schedule-top"><span>WEEKLY OVERVIEW</span><span class="login-schedule-dot"></span></div>
-            <div class="login-schedule-days"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span></div>
-            <div class="login-schedule-lines"><i></i><i></i><i></i></div>
-          </div>
-        </section>
-        <form class="login-panel" id="login-form">
-          <div class="login-panel-heading">
-            <div class="eyebrow"><span class="eyebrow-line"></span> WELCOME BACK</div>
-            <h1>Sign in</h1>
-            <p class="login-subtitle">Enter your account details to continue.</p>
-          </div>
-          <label class="field login-field">Email or username<span class="login-input-wrap"><span aria-hidden="true">♙</span><input id="login-email" name="usernameOrEmail" type="text" placeholder="Enter your email or username" autocomplete="username" required autofocus></span></label>
-          <label class="field login-field">Password<span class="login-input-wrap"><span aria-hidden="true">⌑</span><input id="login-password" name="password" type="password" placeholder="Enter your password" autocomplete="current-password" required></span></label>
-          <p class="login-error" id="login-error" role="alert" hidden>Incorrect username or password.</p>
-          <button class="button button-primary login-submit" type="submit">Log in <span aria-hidden="true">→</span></button>
-          <button class="text-button login-account-toggle" id="show-registration" type="button">Create a teacher account</button>
-          <p class="login-privacy"><span aria-hidden="true">▣</span> Sign in with your registered email or, for an account created by an admin, your username. Keep your password private.</p>
-        </form>
-        <form class="login-panel registration-panel" id="registration-form" hidden>
-          <div class="login-panel-heading">
-            <div class="eyebrow"><span class="eyebrow-line"></span> NEW TEACHER</div>
-            <h1>Create account</h1>
-            <p class="login-subtitle">Create an email/password account to add your profile to shared school records.</p>
-          </div>
-          <label class="field login-field">Full name<span class="login-input-wrap"><span aria-hidden="true">♙</span><input id="registration-name" name="name" type="text" maxlength="100" autocomplete="name" required></span></label>
-          <label class="field login-field">Employee ID <span>(optional)</span><span class="login-input-wrap"><span aria-hidden="true">#</span><input id="registration-employee-id" name="employeeId" type="text" maxlength="40"></span></label>
-          <label class="field login-field">Position / designation <span>(optional)</span><span class="login-input-wrap"><span aria-hidden="true">▤</span><input id="registration-position" name="position" type="text" maxlength="80" placeholder="e.g. Teacher III"></span></label>
-          <label class="field login-field">Email<span class="login-input-wrap"><span aria-hidden="true">@</span><input id="registration-email" name="email" type="email" autocomplete="email" required></span></label>
-          <label class="field login-field">Username<span class="login-input-wrap"><span aria-hidden="true">♙</span><input id="registration-username" name="username" type="text" maxlength="40" autocomplete="username" pattern="[a-zA-Z0-9._\-]{3,40}" title="Use 3–40 letters, numbers, periods, underscores, or hyphens." required></span></label>
-          <label class="field login-field">Password <span>(at least 8 characters)</span><span class="login-input-wrap"><span aria-hidden="true">⌑</span><input id="registration-password" name="password" type="password" minlength="8" autocomplete="new-password" required></span></label>
-          <label class="field login-field">Confirm password<span class="login-input-wrap"><span aria-hidden="true">⌑</span><input id="registration-confirm-password" name="confirmPassword" type="password" minlength="8" autocomplete="new-password" required></span></label>
-          <p class="login-error" id="registration-error" role="alert" hidden></p>
-          <button class="button button-primary login-submit" type="submit">Create account <span aria-hidden="true">→</span></button>
-          <button class="text-button login-account-toggle" id="show-login" type="button">Already have an account? Sign in</button>
-          <p class="login-privacy"><span aria-hidden="true">▣</span> The administrator will review school records. Use a unique password and don't share your login details.</p>
-        </form>
-        <form class="login-panel" id="initial-password-form" hidden>
-          <div class="login-panel-heading">
-            <div class="eyebrow"><span class="eyebrow-line"></span> ACCOUNT SECURITY</div>
-            <h1>Set your password</h1>
-            <p class="login-subtitle">Your administrator created a temporary password. Choose a new password to continue.</p>
-          </div>
-          <label class="field login-field">New password <span>(at least 12 characters)</span><span class="login-input-wrap"><span aria-hidden="true">⌑</span><input id="initial-new-password" name="newPassword" type="password" minlength="12" autocomplete="new-password" required></span></label>
-          <label class="field login-field">Confirm new password<span class="login-input-wrap"><span aria-hidden="true">⌑</span><input id="initial-confirm-password" name="confirmPassword" type="password" minlength="12" autocomplete="new-password" required></span></label>
-          <p class="login-error" id="initial-password-error" role="alert" hidden></p>
-          <button class="button button-primary login-submit" type="submit">Save new password <span aria-hidden="true">→</span></button>
-          <button class="text-button login-account-toggle" id="initial-password-signout" type="button">Sign out</button>
-        </form>
-      </div>
-    </main>
-    <div class="app-shell" id="app-shell" hidden>
+    <div class="app-shell" id="app-shell">
       <aside class="sidebar" id="sidebar">
         <a class="brand" href="#overview" aria-label="Teacher Load Manager home">
           <span class="brand-mark" data-brand-mark aria-hidden="true">TL</span>
@@ -98,7 +35,7 @@
         <div class="sidebar-label sidebar-label-secondary" id="sidebar-management-label">MANAGEMENT</div>
         <nav class="main-nav" id="nav-management" aria-label="Management">
           <button class="nav-link" id="nav-teachers" data-view="teachers" type="button">
-            <span class="nav-icon" aria-hidden="true">♙</span> Teachers Account
+            <span class="nav-icon" aria-hidden="true">♙</span> Teachers
             <span class="nav-count" id="teacher-nav-count">0</span>
           </button>
           <button class="nav-link" id="sidebar-open-settings" type="button">
@@ -107,12 +44,14 @@
         </nav>
 
         <div class="sidebar-bottom">
-          <button class="button button-secondary logout-button" id="logout-button" type="button">Log out</button>
+          <button class="button button-secondary logout-button" id="backup-records" type="button">Download full backup</button>
           <div class="help-card">
             <span class="help-icon" aria-hidden="true">i</span>
-            <strong>Keep your records handy</strong>
-            <p>Your records are stored in this XAMPP server's MySQL database. Export a backup regularly.</p>
-            <button class="text-button" id="sidebar-export" type="button">Export records <span aria-hidden="true">→</span></button>
+            <strong>Records stay on this device</strong>
+            <p>This browser stores the only copy. Download a full backup regularly.</p>
+            <button class="text-button" id="restore-records" type="button">Restore from backup</button>
+            <input id="restore-records-file" type="file" accept="application/json,.json" hidden>
+            <button class="text-button" id="sidebar-export" type="button">Export teaching-load CSV <span aria-hidden="true">→</span></button>
           </div>
           <div class="sidebar-foot">TEACHER LOAD MANAGER <span>·</span> SCHOOL RECORDS</div>
         </div>
@@ -151,7 +90,7 @@
                 <p class="page-subtitle">A clear view of your teachers and their teaching assignments.</p>
               </div>
               <div class="heading-actions">
-                <button class="button button-secondary" data-add-teacher type="button"><span aria-hidden="true">＋</span> Add user account</button>
+                <button class="button button-secondary" data-add-teacher type="button"><span aria-hidden="true">＋</span> Add teacher</button>
                 <button class="button button-secondary" id="print-overview" type="button"><span aria-hidden="true">⎙</span> Print</button>
                 <button class="button button-primary" id="quick-add-load" type="button"><span aria-hidden="true">＋</span> Add teaching load</button>
               </div>
@@ -206,7 +145,7 @@
                 </div>
               </aside>
             </div>
-            <p class="privacy-note"><span aria-hidden="true">⌑</span> Teaching and school records are stored in the school's local MySQL database.</p>
+            <p class="privacy-note"><span aria-hidden="true">⌑</span> School records are stored in this browser on this device only.</p>
           </section>
 
           <section class="view-panel" id="view-teachers" aria-labelledby="teachers-title">
@@ -216,7 +155,7 @@
                 <h1 id="teachers-title">Teachers</h1>
                 <p class="page-subtitle" id="teacher-page-subtitle">Manage teacher profiles and review their assigned minutes.</p>
               </div>
-              <div class="heading-actions"><button class="button button-primary" id="add-teacher" type="button"><span aria-hidden="true">＋</span> Add user account</button></div>
+              <div class="heading-actions"><button class="button button-primary" id="add-teacher" type="button"><span aria-hidden="true">＋</span> Add teacher</button></div>
             </div>
             <div class="teacher-dashboard-links" aria-label="Teacher dashboard shortcuts">
               <button class="teacher-dashboard-card" data-go="loads" type="button">
@@ -242,19 +181,7 @@
                   <thead><tr><th>TEACHER</th><th>EMPLOYEE ID</th><th>POSITION</th><th>ASSIGNMENTS</th><th>MINUTES / WEEK</th><th>STATUS</th><th><span class="sr-only">Actions</span></th></tr></thead>
                   <tbody id="teachers-body"></tbody>
                 </table>
-                <div class="empty-state" id="teachers-empty"><span class="empty-icon" aria-hidden="true">♙</span><strong>No teachers to show</strong><p>Create a teacher account to get started.</p><button class="button button-primary button-small" data-add-teacher type="button">Add user account</button></div>
-              </div>
-            </section>
-            <section class="panel list-panel account-activity-panel">
-              <div class="list-toolbar">
-                <div><h2>Account sign-in history</h2><p class="panel-subtitle" id="account-login-caption">Sign-in history is not collected</p></div>
-              </div>
-              <div class="table-wrap">
-                <table>
-                  <thead><tr><th>DATE AND TIME</th><th>USERNAME</th><th>EVENT</th></tr></thead>
-                  <tbody id="account-login-body"></tbody>
-                </table>
-                <div class="empty-state" id="account-login-empty"><span class="empty-icon" aria-hidden="true">◷</span><strong>Sign-in history is not collected</strong><p>The local MySQL database stores account profiles and school records, but not sign-in events.</p></div>
+                <div class="empty-state" id="teachers-empty"><span class="empty-icon" aria-hidden="true">♙</span><strong>No teachers to show</strong><p>Add teacher profiles to get started.</p><button class="button button-primary button-small" data-add-teacher type="button">Add teacher</button></div>
               </div>
             </section>
           </section>
@@ -346,32 +273,16 @@
 
     <dialog class="form-dialog" id="teacher-dialog" aria-labelledby="teacher-dialog-title">
       <form id="teacher-form">
-        <div class="dialog-heading"><div><div class="eyebrow">SCHOOL PERSONNEL</div><h2 id="teacher-dialog-title">Add teacher account</h2><p id="teacher-dialog-description">Create a teacher login and profile. Give the temporary password to the teacher securely.</p></div><button class="dialog-close" type="button" data-close-dialog aria-label="Close">×</button></div>
+        <div class="dialog-heading"><div><div class="eyebrow">SCHOOL PERSONNEL</div><h2 id="teacher-dialog-title">Add teacher profile</h2><p id="teacher-dialog-description">Keep the teacher's profile details and employment status up to date.</p></div><button class="dialog-close" type="button" data-close-dialog aria-label="Close">×</button></div>
         <input id="teacher-id" type="hidden">
         <div class="form-grid">
           <label class="field field-full">Full name <span class="required">*</span><input id="teacher-name" name="name" type="text" maxlength="100" placeholder="e.g. Maria Santos" required></label>
-          <label class="field field-full" id="teacher-username-field">Username <span class="required">*</span><span>(the teacher uses this to sign in; no email is needed)</span><input id="teacher-username" name="username" type="text" maxlength="40" pattern="[a-zA-Z0-9._\-]{3,40}" title="Use 3–40 letters, numbers, periods, underscores, or hyphens." autocomplete="username" placeholder="e.g. maria.santos" required></label>
-          <label class="field" id="teacher-temp-password-field">Password <span class="required">*</span><span>(temporary; at least 12 characters)</span><input id="teacher-temp-password" name="temporaryPassword" type="password" minlength="12" autocomplete="new-password" placeholder="Enter a temporary password" required></label>
-          <label class="field" id="teacher-confirm-password-field">Confirm temporary password<input id="teacher-confirm-password" name="confirmPassword" type="password" minlength="12" autocomplete="new-password" required></label>
           <label class="field">Employee ID<input id="teacher-employee-id" name="employeeId" type="text" maxlength="40" placeholder="e.g. 1234567"></label>
           <label class="field">Position / designation<input id="teacher-position" name="position" type="text" maxlength="80" placeholder="e.g. Teacher III"></label>
           <label class="field" id="teacher-status-field">Employment status<select id="teacher-status" name="status"><option value="Active">Active</option><option value="On leave">On leave</option><option value="Inactive">Inactive</option></select></label>
         </div>
         <p class="login-error" id="teacher-form-error" role="alert" hidden></p>
-        <div class="dialog-actions"><button class="button button-secondary" type="button" data-close-dialog>Cancel</button><button class="button button-primary" id="teacher-form-submit" type="submit">Create teacher account</button></div>
-      </form>
-    </dialog>
-
-    <dialog class="form-dialog" id="teacher-password-dialog" aria-labelledby="teacher-password-title">
-      <form id="teacher-password-form">
-        <div class="dialog-heading"><div><div class="eyebrow">ACCOUNT SECURITY</div><h2 id="teacher-password-title">Reset teacher password</h2><p>Set a temporary password for <strong id="teacher-password-name"></strong>. They will be required to change it at their next sign-in.</p></div><button class="dialog-close" type="button" data-close-dialog aria-label="Close">×</button></div>
-        <input id="teacher-password-id" type="hidden">
-        <div class="form-grid">
-          <label class="field field-full">Temporary password <span class="required">*</span><span>(12–128 characters)</span><input id="teacher-new-password" name="newPassword" type="password" minlength="12" maxlength="128" autocomplete="new-password" required></label>
-          <label class="field field-full">Confirm temporary password <span class="required">*</span><input id="teacher-confirm-new-password" name="confirmNewPassword" type="password" minlength="12" maxlength="128" autocomplete="new-password" required></label>
-        </div>
-        <p class="login-error" id="teacher-password-error" role="alert" hidden></p>
-        <div class="dialog-actions"><button class="button button-secondary" type="button" data-close-dialog>Cancel</button><button class="button button-primary" type="submit">Reset password</button></div>
+        <div class="dialog-actions"><button class="button button-secondary" type="button" data-close-dialog>Cancel</button><button class="button button-primary" id="teacher-form-submit" type="submit">Add teacher profile</button></div>
       </form>
     </dialog>
 
@@ -487,7 +398,7 @@
               <input id="setting-school-logo" name="schoolLogo" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
               <button class="button button-secondary button-small" id="remove-school-logo" type="button" hidden>Remove logo</button>
             </div>
-            <small class="field-hint">Choose a PNG, JPG, WebP, or GIF image up to 1 MB. The logo is saved with the shared school records.</small>
+            <small class="field-hint">Choose a PNG, JPG, WebP, or GIF image up to 1 MB. The logo is saved in this browser.</small>
             <input id="setting-remove-school-logo" type="checkbox" hidden>
           </div>
         </div>
@@ -519,11 +430,6 @@
             <label class="period-time-row"><span>Period 6</span><input type="time" data-period-start="6" aria-label="Period 6 start time"><input type="time" data-period-end="6" aria-label="Period 6 end time"></label>
             <label class="period-time-row"><span>Period 7</span><input type="time" data-period-start="7" aria-label="Period 7 start time"><input type="time" data-period-end="7" aria-label="Period 7 end time"></label>
           </div>
-        </section>
-        <section class="group-names-field" aria-labelledby="legacy-import-title">
-          <div class="period-settings-heading"><h3 id="legacy-import-title">Import old browser records</h3></div>
-          <p class="field-hint">Adds this browser's saved teacher, assignment, leave, and coverage records to this MySQL database without replacing existing records. Old account passwords are not transferred; teachers must create new accounts.</p>
-          <button class="button button-secondary button-small" id="import-legacy-records" type="button">Import records from this browser</button>
         </section>
         <div class="dialog-actions"><button class="button button-secondary" type="button" data-close-dialog>Cancel</button><button class="button button-primary" type="submit">Save details</button></div>
       </form>

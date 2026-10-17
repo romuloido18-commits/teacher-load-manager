@@ -1,13 +1,8 @@
 "use strict";
 
+const LOCAL_STORAGE_KEY = "teacher-load-manager-v2";
 const LEGACY_STORAGE_KEY = "teacher-load-manager-v1";
 const LEGACY_ACCOUNTS_KEY = "teacher-load-manager-accounts-v1";
-let csrfToken = "";
-let cloudRevision = 0;
-let appInitialized = false;
-let cloudSaveInProgress = false;
-let cloudRefreshInProgress = false;
-let cloudRefreshTimer = 0;
 const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const DEFAULT_PERIOD_TIMES = Object.fromEntries(
   Array.from({ length: 7 }, (_, index) => [String(index + 1), { start: "", end: "" }]),
@@ -60,34 +55,11 @@ const elements = {
   navLinks: [...document.querySelectorAll(".nav-link")],
   breadcrumb: document.querySelector("#breadcrumb-current"),
   teacherDialog: document.querySelector("#teacher-dialog"),
-  teacherPasswordDialog: document.querySelector("#teacher-password-dialog"),
   loadDialog: document.querySelector("#load-dialog"),
   teacherLoadPreview: document.querySelector("#teacher-load-preview"),
   settingsDialog: document.querySelector("#settings-dialog"),
   toastRegion: document.querySelector("#toast-region"),
 };
-
-async function apiRequest(action, body = null) {
-  const response = await fetch(`api.php?action=${encodeURIComponent(action)}`, {
-    method: body === null ? "GET" : "POST",
-    credentials: "same-origin",
-    headers: body === null ? {} : { "Content-Type": "application/json", "X-CSRF-Token": csrfToken },
-    body: body === null ? undefined : JSON.stringify(body),
-  });
-  let result;
-  try {
-    result = await response.json();
-  } catch {
-    throw new Error("The local server returned an invalid response. Check that XAMPP Apache and PHP are running.");
-  }
-  if (!response.ok || result?.error) {
-    const error = new Error(result?.error ?? `The server returned HTTP ${response.status}.`);
-    error.code = result?.code ?? "";
-    throw error;
-  }
-  if (typeof result?.csrfToken === "string") csrfToken = result.csrfToken;
-  return result;
-}
 
 function createId() {
   return globalThis.crypto?.randomUUID?.() ?? `record-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -128,156 +100,60 @@ function applySchoolState(parsed) {
   };
 }
 
-async function loadCloudState() {
-  const result = await apiRequest("state/load");
-  const { data } = result;
-  if (!data || typeof data !== "object" || !Number.isSafeInteger(Number(data.revision))) {
-    throw new Error("The shared records response is incomplete.");
-  }
-  applySchoolState(data.data);
-  cloudRevision = Number(data.revision);
-}
-
 async function saveState() {
-  if (!state.currentAccount) {
-    showToast("Sign in before saving shared school records.", "error");
-    return false;
-  }
-  cloudSaveInProgress = true;
   try {
-    const result = await apiRequest("state/save", {
-      data: {
-        teachers: state.teachers,
-        loads: state.loads,
-        substitutionPlans: state.substitutionPlans,
-        leaveApplications: state.leaveApplications,
-        settings: state.settings,
-      },
-      expectedRevision: cloudRevision,
-    });
-    cloudRevision = Number(result.revision);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({
+      teachers: state.teachers,
+      loads: state.loads,
+      substitutionPlans: state.substitutionPlans,
+      leaveApplications: state.leaveApplications,
+      settings: state.settings,
+    }));
     return true;
   } catch (error) {
-    const message = error.code === "CONFLICT"
-      ? "Another user changed school records. Reload the page before trying again; your unsaved change was not saved."
-      : `Couldn't save shared records: ${error.message}`;
-    showToast(message, "error");
+    showToast(`Couldn't save this browser's records: ${error.message}`, "error");
     return false;
-  } finally {
-    cloudSaveInProgress = false;
   }
 }
 
-async function refreshCloudState() {
-  if (!state.currentAccount || document.hidden || cloudSaveInProgress || cloudRefreshInProgress
-    || document.querySelector("dialog[open]")) return;
-  cloudRefreshInProgress = true;
-  try {
-    const activeView = state.activeView;
-    await loadCloudState();
-    state.activeView = activeView;
-    render();
-    switchView(activeView);
-  } catch (error) {
-    showToast(`Couldn't refresh shared records: ${error.message}`, "error");
-  } finally {
-    cloudRefreshInProgress = false;
-  }
+function mergeLocalRecords(currentRecords, importedRecords) {
+  const knownIds = new Set(currentRecords.map((record) => record.id).filter(Boolean));
+  return [...currentRecords, ...importedRecords.filter((record) => {
+    if (!record || typeof record !== "object" || typeof record.id !== "string") return false;
+    if (knownIds.has(record.id)) return false;
+    knownIds.add(record.id);
+    return true;
+  })];
 }
 
-async function importLegacyRecords() {
-  if (!isAdminAccount()) {
-    showToast("Only the admin can import records from this browser.", "error");
+async function loadLocalState() {
+  const current = localStorage.getItem(LOCAL_STORAGE_KEY);
+  const legacy = current === null ? localStorage.getItem(LEGACY_STORAGE_KEY) : null;
+  if (current !== null) {
+    applySchoolState(JSON.parse(current));
     return;
   }
-  if (!window.confirm("Import this browser's old teacher, load, leave, and substitution records into the XAMPP MySQL database? Existing records will be kept. Old passwords and accounts are not imported.")) {
-    return;
-  }
+  if (legacy !== null) applySchoolState(JSON.parse(legacy));
+  else applySchoolState({ teachers: [], loads: [], substitutionPlans: [], leaveApplications: [], settings: DEFAULT_SETTINGS });
 
-  let imported;
-  try {
-    imported = {
-      teachers: [],
-      loads: [],
-      substitutionPlans: [],
-      leaveApplications: [],
-    };
-    const saved = localStorage.getItem(LEGACY_STORAGE_KEY);
-    if (saved) {
-      const records = JSON.parse(saved);
-      if (!records || !Array.isArray(records.teachers) || !Array.isArray(records.loads)) {
-        throw new Error("The browser's saved school records have an invalid format.");
+  const savedAccounts = localStorage.getItem(LEGACY_ACCOUNTS_KEY);
+  if (savedAccounts) {
+    const legacyAccounts = JSON.parse(savedAccounts);
+    if (!Array.isArray(legacyAccounts)) throw new Error("The old browser accounts have an invalid format.");
+    legacyAccounts.filter((account) => account.role === "teacher" && account.teacherId).forEach((account) => {
+      const accountRecordsText = localStorage.getItem(`${LEGACY_STORAGE_KEY}:account:${account.id}`);
+      if (!accountRecordsText) return;
+      const accountRecords = JSON.parse(accountRecordsText);
+      if (!accountRecords || !Array.isArray(accountRecords.teachers) || !Array.isArray(accountRecords.loads)) {
+        throw new Error(`Old records for ${account.username || "a teacher"} have an invalid format.`);
       }
-      imported.teachers.push(...records.teachers);
-      imported.loads.push(...records.loads);
-      imported.substitutionPlans.push(...(Array.isArray(records.substitutionPlans) ? records.substitutionPlans : []));
-      imported.leaveApplications.push(...(Array.isArray(records.leaveApplications) ? records.leaveApplications : []));
-    }
-
-    const savedAccounts = localStorage.getItem(LEGACY_ACCOUNTS_KEY);
-    if (savedAccounts) {
-      const legacyAccounts = JSON.parse(savedAccounts);
-      if (!Array.isArray(legacyAccounts)) throw new Error("The browser's saved accounts have an invalid format.");
-      legacyAccounts.filter((account) => account.role === "teacher" && account.teacherId).forEach((account) => {
-        const accountRecordsText = localStorage.getItem(`${LEGACY_STORAGE_KEY}:account:${account.id}`);
-        if (!accountRecordsText) return;
-        const accountRecords = JSON.parse(accountRecordsText);
-        if (!accountRecords || !Array.isArray(accountRecords.teachers) || !Array.isArray(accountRecords.loads)) {
-          throw new Error(`Saved records for ${account.username || "a teacher"} have an invalid format.`);
-        }
-        imported.teachers.push(...accountRecords.teachers.filter((teacher) => teacher.id === account.teacherId));
-        imported.loads.push(...accountRecords.loads.filter((load) => load.teacherId === account.teacherId));
-        imported.substitutionPlans.push(...(Array.isArray(accountRecords.substitutionPlans) ? accountRecords.substitutionPlans : []));
-        imported.leaveApplications.push(...(Array.isArray(accountRecords.leaveApplications) ? accountRecords.leaveApplications : []));
-      });
-    }
-  } catch (error) {
-    showToast(`Couldn't read old records: ${error.message}`, "error");
-    return;
-  }
-
-  const hasRecords = Object.values(imported).some((records) => records.length);
-  if (!hasRecords) {
-    showToast("No old school records were found in this browser.", "error");
-    return;
-  }
-  const mergeById = (cloudRecords, localRecords) => {
-    const merged = [...cloudRecords];
-    const knownIds = new Set(cloudRecords.map((record) => record.id).filter(Boolean));
-    localRecords.forEach((record) => {
-      if (!record || typeof record !== "object" || typeof record.id !== "string") {
-        throw new Error("An old record is missing its ID.");
-      }
-      if (!knownIds.has(record.id)) {
-        knownIds.add(record.id);
-        merged.push(record);
-      }
+      state.teachers = mergeLocalRecords(state.teachers, accountRecords.teachers.filter((teacher) => teacher.id === account.teacherId));
+      state.loads = mergeLocalRecords(state.loads, accountRecords.loads.filter((load) => load.teacherId === account.teacherId));
+      state.substitutionPlans = mergeLocalRecords(state.substitutionPlans, accountRecords.substitutionPlans ?? []);
+      state.leaveApplications = mergeLocalRecords(state.leaveApplications, accountRecords.leaveApplications ?? []);
     });
-    return merged;
-  };
-  const previous = {
-    teachers: state.teachers,
-    loads: state.loads,
-    substitutionPlans: state.substitutionPlans,
-    leaveApplications: state.leaveApplications,
-  };
-  try {
-    state.teachers = mergeById(previous.teachers, imported.teachers);
-    state.loads = mergeById(previous.loads, imported.loads);
-    state.substitutionPlans = mergeById(previous.substitutionPlans, imported.substitutionPlans);
-    state.leaveApplications = mergeById(previous.leaveApplications, imported.leaveApplications);
-  } catch (error) {
-    Object.assign(state, previous);
-    showToast(`Couldn't prepare old records for import: ${error.message}`, "error");
-    return;
   }
-  if (!(await saveState())) {
-    Object.assign(state, previous);
-    return;
-  }
-  elements.settingsDialog.close();
-  render();
-  showToast("Old records from this browser were added to the MySQL database. Accounts and passwords must be recreated.");
+  await saveState();
 }
 
 function showToast(message, type = "success") {
@@ -494,16 +370,6 @@ function makeActionCell(row, type, id, label, closeLoadPreview = false) {
     type === "teacher" ? openTeacherDialog(id) : openLoadDialog(id);
   });
   actions.append(edit);
-  if (type === "teacher" && isAdminAccount()) {
-    const resetPassword = document.createElement("button");
-    resetPassword.className = "row-action";
-    resetPassword.type = "button";
-    resetPassword.setAttribute("aria-label", `Reset password for ${label}`);
-    resetPassword.title = "Set a temporary password";
-    resetPassword.textContent = "↻";
-    resetPassword.addEventListener("click", () => openTeacherPasswordDialog(id));
-    actions.append(resetPassword);
-  }
   if (!(type === "teacher" && state.currentAccount?.role === "teacher")) {
     const remove = document.createElement("button");
     remove.className = "row-action delete";
@@ -520,63 +386,6 @@ function makeActionCell(row, type, id, label, closeLoadPreview = false) {
   }
   cell.append(actions);
   row.append(cell);
-}
-
-function openTeacherPasswordDialog(teacherId) {
-  if (!isAdminAccount()) {
-    showToast("Only the admin can reset teacher passwords.", "error");
-    return;
-  }
-  const teacher = state.teachers.find((item) => item.id === teacherId);
-  if (!teacher) {
-    showToast("That teacher account could not be found.", "error");
-    return;
-  }
-  document.querySelector("#teacher-password-form").reset();
-  document.querySelector("#teacher-password-id").value = teacherId;
-  document.querySelector("#teacher-password-name").textContent = teacher.name;
-  document.querySelector("#teacher-password-error").hidden = true;
-  elements.teacherPasswordDialog.showModal();
-  document.querySelector("#teacher-new-password").focus();
-}
-
-async function resetTeacherPassword(event) {
-  event.preventDefault();
-  if (!isAdminAccount()) {
-    showToast("Only the admin can reset teacher passwords.", "error");
-    return;
-  }
-  const password = document.querySelector("#teacher-new-password").value;
-  const confirmation = document.querySelector("#teacher-confirm-new-password").value;
-  const errorElement = document.querySelector("#teacher-password-error");
-  errorElement.hidden = true;
-  if (password.length < 12 || password.length > 128) {
-    errorElement.textContent = "Use a temporary password with 12–128 characters.";
-    errorElement.hidden = false;
-    document.querySelector("#teacher-new-password").focus();
-    return;
-  }
-  if (password !== confirmation) {
-    errorElement.textContent = "The passwords do not match.";
-    errorElement.hidden = false;
-    document.querySelector("#teacher-confirm-new-password").focus();
-    return;
-  }
-
-  try {
-    await apiRequest("admin/reset-password", {
-      teacherId: document.querySelector("#teacher-password-id").value,
-      password,
-    });
-  } catch (error) {
-    errorElement.textContent = `Couldn't reset the teacher password: ${error.message}`;
-    errorElement.hidden = false;
-    return;
-  }
-
-  elements.teacherPasswordDialog.close();
-  document.querySelector("#teacher-password-form").reset();
-  showToast("Password reset. Give the temporary password to the teacher securely; they must change it at next sign-in.");
 }
 
 function setEmptyState(tableBody, emptyState, hasRows) {
@@ -626,7 +435,6 @@ function render() {
   renderRecentLoads();
   renderLeaveApplications();
   renderSubstitutionPlans();
-  renderLoginActivity();
   const teacherAccount = isTeacherAccount();
   document.querySelector("#add-teacher").hidden = teacherAccount;
   document.querySelectorAll("[data-add-teacher]").forEach((button) => { button.hidden = teacherAccount; });
@@ -700,14 +508,6 @@ function render() {
   document.querySelector("#teacher-substitution-shortcut-copy").textContent = teacherAccount
     ? "Submit a proposal for admin review"
     : "Review and manage staff coverage";
-}
-
-function renderLoginActivity() {
-  const body = document.querySelector("#account-login-body");
-  const empty = document.querySelector("#account-login-empty");
-  setEmptyState(body, empty, false);
-  document.querySelector("#account-login-caption").textContent =
-    "Sign-in history is not collected by the MySQL database.";
 }
 
 function renderHeader() {
@@ -1663,21 +1463,13 @@ function openTeacherDialog(teacherId) {
   document.querySelector("#teacher-position").value = teacher?.position ?? "";
   document.querySelector("#teacher-status").value = teacher?.status ?? "Active";
   const editing = Boolean(teacher);
-  document.querySelector("#teacher-dialog-title").textContent = editing ? "Edit teacher profile" : "Add teacher user account";
-  document.querySelector("#teacher-dialog-description").textContent = editing
-    ? "Update the teacher's profile details."
-    : "Create a username and profile. Give the username and temporary password to the teacher securely.";
-  document.querySelector("#teacher-username-field").hidden = editing;
-  document.querySelector("#teacher-temp-password-field").hidden = editing;
-  document.querySelector("#teacher-confirm-password-field").hidden = editing;
+  document.querySelector("#teacher-dialog-title").textContent = editing ? "Edit teacher profile" : "Add teacher profile";
+  document.querySelector("#teacher-dialog-description").textContent = "Keep the teacher's profile details and employment status up to date.";
   document.querySelector("#teacher-status-field").hidden = !editing;
-  document.querySelector("#teacher-username").required = !editing;
-  document.querySelector("#teacher-temp-password").required = !editing;
-  document.querySelector("#teacher-confirm-password").required = !editing;
   document.querySelector("#teacher-form-error").hidden = true;
-  document.querySelector("#teacher-form-submit").textContent = editing ? "Save teacher profile" : "Create user account";
+  document.querySelector("#teacher-form-submit").textContent = editing ? "Save teacher profile" : "Add teacher profile";
   elements.teacherDialog.showModal();
-  document.querySelector(editing ? "#teacher-name" : "#teacher-username").focus();
+  document.querySelector("#teacher-name").focus();
 }
 
 function openLoadDialog(loadId, selectedTeacherId = "") {
@@ -1767,56 +1559,9 @@ async function saveTeacher(event) {
   const form = new FormData(event.currentTarget);
   const id = document.querySelector("#teacher-id").value;
   const employeeId = String(form.get("employeeId") ?? "").trim();
-  const profileError = document.querySelector("#teacher-form-error");
-  profileError.hidden = true;
   if (employeeId && state.teachers.some((teacher) => teacher.id !== id && teacher.employeeId?.toLocaleLowerCase() === employeeId.toLocaleLowerCase())) {
     showToast("That employee ID is already used by another teacher.", "error");
     document.querySelector("#teacher-employee-id").focus();
-    return;
-  }
-  if (!id) {
-    const username = String(form.get("username") ?? "").trim().toLocaleLowerCase();
-    const temporaryPassword = String(form.get("temporaryPassword") ?? "");
-    if (!/^[a-zA-Z0-9._-]{3,40}$/.test(username)) {
-      profileError.textContent = "Use 3–40 letters, numbers, periods, underscores, or hyphens for the username.";
-      profileError.hidden = false;
-      document.querySelector("#teacher-username").focus();
-      return;
-    }
-    if (temporaryPassword.length < 12) {
-      profileError.textContent = "Use a temporary password with at least 12 characters.";
-      profileError.hidden = false;
-      document.querySelector("#teacher-temp-password").focus();
-      return;
-    }
-    if (temporaryPassword !== String(form.get("confirmPassword") ?? "")) {
-      profileError.textContent = "The temporary passwords do not match.";
-      profileError.hidden = false;
-      document.querySelector("#teacher-confirm-password").focus();
-      return;
-    }
-    try {
-      await apiRequest("admin/create-teacher", {
-        username,
-        password: temporaryPassword,
-        fullName: String(form.get("name") ?? "").trim(),
-        employeeId,
-        position: String(form.get("position") ?? "").trim(),
-      });
-    } catch (error) {
-      profileError.textContent = `Couldn't create the user account: ${error.message}`;
-      profileError.hidden = false;
-      return;
-    }
-    elements.teacherDialog.close();
-    document.querySelector("#teacher-form").reset();
-    try {
-      await loadCloudState();
-      render();
-      showToast("Teacher account created. Give the username and temporary password to the teacher securely.");
-    } catch (error) {
-      showToast(`Account created, but the directory couldn't refresh: ${error.message}. Reload the page.`, "error");
-    }
     return;
   }
   const record = {
@@ -1836,7 +1581,7 @@ async function saveTeacher(event) {
   }
   elements.teacherDialog.close();
   render();
-  showToast("Teacher profile updated.");
+  showToast(id ? "Teacher profile updated." : "Teacher profile added.");
 }
 
 async function saveLoad(event) {
@@ -2046,6 +1791,61 @@ function exportCsv() {
   link.remove();
   URL.revokeObjectURL(url);
   showToast(state.loads.length ? "Teaching-load CSV exported." : "CSV template exported. Add assignments to include records.");
+}
+
+function exportBackup() {
+  const backup = {
+    app: "Teacher Load Manager",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    data: {
+      teachers: state.teachers,
+      loads: state.loads,
+      substitutionPlans: state.substitutionPlans,
+      leaveApplications: state.leaveApplications,
+      settings: state.settings,
+    },
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `teacher-load-manager-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  showToast("Full school-record backup downloaded.");
+}
+
+async function restoreBackup(event) {
+  const file = event.currentTarget.files?.[0];
+  event.currentTarget.value = "";
+  if (!file) return;
+  try {
+    const backup = JSON.parse(await file.text());
+    const data = backup?.data ?? backup;
+    if (!data || !Array.isArray(data.teachers) || !Array.isArray(data.loads)) {
+      throw new Error("This file is not a valid school-record backup.");
+    }
+    if (!window.confirm("Replace this browser's current school records with the selected backup?")) return;
+    const previous = {
+      teachers: state.teachers,
+      loads: state.loads,
+      substitutionPlans: state.substitutionPlans,
+      leaveApplications: state.leaveApplications,
+      settings: state.settings,
+    };
+    applySchoolState(data);
+    if (!(await saveState())) {
+      applySchoolState(previous);
+      return;
+    }
+    render();
+    showToast("School records restored from backup.");
+  } catch (error) {
+    showToast(`Couldn't restore this backup: ${error.message}`, "error");
+  }
 }
 
 function openSettingsDialog() {
@@ -2289,209 +2089,16 @@ function closeSidebar() {
   document.querySelector("#sidebar-scrim").classList.remove("is-visible");
 }
 
-async function enterApplication(profile, errorElement) {
-  if (profile.mustChangePassword) {
-    document.querySelector("#login-form").hidden = true;
-    document.querySelector("#registration-form").hidden = true;
-    document.querySelector("#initial-password-form").hidden = false;
-    document.querySelector("#initial-password-error").hidden = true;
-    document.querySelector("#login-screen").hidden = false;
-    document.querySelector("#app-shell").hidden = true;
-    document.querySelector("#initial-new-password").focus();
-    return true;
-  }
-  document.querySelector("#initial-password-form").hidden = true;
-  state.currentAccount = {
-    id: profile.id,
-    email: profile.email,
-    username: profile.username,
-    role: profile.role,
-    teacherId: profile.teacherId,
-  };
-  if (!appInitialized) {
-    if (!initializeApp()) return false;
-    appInitialized = true;
-  }
+async function initialize() {
+  state.currentAccount = { id: "local-browser", username: "local", role: "admin", teacherId: "" };
   try {
-    await loadCloudState();
-  } catch (loadError) {
-    state.currentAccount = null;
-    displayLoginError(errorElement, `Couldn't load shared school records: ${loadError.message}`);
-    try {
-      await apiRequest("logout", {});
-    } catch (logoutError) {
-      displayLoginError(errorElement, `Couldn't load shared school records: ${loadError.message}. Sign-out also failed: ${logoutError.message}`);
-    }
-    return false;
+    await loadLocalState();
+  } catch (error) {
+    showToast(`Couldn't load saved browser records: ${error.message}`, "error");
   }
-  state.activeView = "overview";
+  initializeApp();
   render();
   switchView("overview");
-  document.querySelector("#login-screen").hidden = true;
-  document.querySelector("#app-shell").hidden = false;
-  return true;
-}
-
-function setLoginMode(registering) {
-  document.querySelector("#login-form").hidden = registering;
-  document.querySelector("#registration-form").hidden = !registering;
-  document.querySelector("#initial-password-form").hidden = true;
-  document.querySelector("#login-error").hidden = true;
-  document.querySelector("#registration-error").hidden = true;
-  document.querySelector(registering ? "#registration-name" : "#login-email").focus();
-}
-
-async function changeInitialPassword(event) {
-  event.preventDefault();
-  const errorElement = document.querySelector("#initial-password-error");
-  const password = document.querySelector("#initial-new-password").value;
-  if (password.length < 12) {
-    displayLoginError(errorElement, "Choose a password with at least 12 characters.");
-    return;
-  }
-  if (password !== document.querySelector("#initial-confirm-password").value) {
-    displayLoginError(errorElement, "The passwords do not match.");
-    document.querySelector("#initial-confirm-password").focus();
-    return;
-  }
-  try {
-    const result = await apiRequest("change-password", { password });
-    document.querySelector("#initial-password-form").reset();
-    if (!(await enterApplication(result.profile, errorElement))) return;
-  } catch (error) {
-    displayLoginError(errorElement, `Couldn't update your password: ${error.message}`);
-  }
-}
-
-function displayLoginError(element, message) {
-  element.textContent = message;
-  element.hidden = false;
-}
-
-async function createTeacherAccount(event) {
-  event.preventDefault();
-  const errorElement = document.querySelector("#registration-error");
-  const username = document.querySelector("#registration-username").value.trim();
-  const email = document.querySelector("#registration-email").value.trim().toLocaleLowerCase();
-  const password = document.querySelector("#registration-password").value;
-  const confirmPassword = document.querySelector("#registration-confirm-password").value;
-  if (!/^[a-zA-Z0-9._-]{3,40}$/.test(username)) {
-    displayLoginError(errorElement, "Use 3–40 letters, numbers, periods, underscores, or hyphens for the username.");
-    return;
-  }
-  if (!email) {
-    displayLoginError(errorElement, "Enter a valid email address.");
-    document.querySelector("#registration-email").focus();
-    return;
-  }
-  if (password.length < 8) {
-    displayLoginError(errorElement, "Choose a password with at least 8 characters.");
-    return;
-  }
-  if (password !== confirmPassword) {
-    displayLoginError(errorElement, "The passwords do not match.");
-    document.querySelector("#registration-confirm-password").focus();
-    return;
-  }
-
-  const fullName = document.querySelector("#registration-name").value.trim();
-  if (!fullName) {
-    displayLoginError(errorElement, "Enter your full name.");
-    document.querySelector("#registration-name").focus();
-    return;
-  }
-  try {
-    const result = await apiRequest("register", {
-      username: username.toLocaleLowerCase(),
-      email,
-      password,
-      fullName,
-      employeeId: document.querySelector("#registration-employee-id").value.trim(),
-      position: document.querySelector("#registration-position").value.trim(),
-    });
-    document.querySelector("#registration-form").reset();
-    await enterApplication(result.profile, errorElement);
-  } catch (error) {
-    displayLoginError(errorElement, `Couldn't create the account: ${error.message}`);
-  }
-}
-
-function initialize() {
-  const loginForm = document.querySelector("#login-form");
-  const loginError = document.querySelector("#login-error");
-  const registrationForm = document.querySelector("#registration-form");
-  const registrationError = document.querySelector("#registration-error");
-  const initialPasswordForm = document.querySelector("#initial-password-form");
-  const initialPasswordError = document.querySelector("#initial-password-error");
-  window.addEventListener("focus", refreshCloudState);
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) refreshCloudState();
-  });
-  cloudRefreshTimer = window.setInterval(() => {
-    if (!document.hidden) refreshCloudState();
-  }, 30000);
-  loginForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const identifier = document.querySelector("#login-email").value.trim();
-    const password = document.querySelector("#login-password").value;
-    try {
-      const result = await apiRequest("login", { identifier, password });
-      loginError.hidden = true;
-      await enterApplication(result.profile, loginError);
-    } catch (error) {
-      displayLoginError(loginError, `Couldn't sign in: ${error.message}`);
-      document.querySelector("#login-password").value = "";
-      document.querySelector("#login-password").focus();
-    }
-  });
-  registrationForm.addEventListener("submit", async (event) => {
-    registrationError.hidden = true;
-    await createTeacherAccount(event);
-  });
-  initialPasswordForm.addEventListener("submit", changeInitialPassword);
-  document.querySelector("#initial-password-signout").addEventListener("click", async () => {
-    try {
-      await apiRequest("logout", {});
-    } catch (error) {
-      displayLoginError(initialPasswordError, `Couldn't sign out: ${error.message}`);
-      return;
-    }
-    initialPasswordForm.reset();
-    document.querySelector("#initial-password-form").hidden = true;
-    document.querySelector("#login-screen").hidden = false;
-    setLoginMode(false);
-  });
-  document.querySelector("#show-registration").addEventListener("click", () => setLoginMode(true));
-  document.querySelector("#show-login").addEventListener("click", () => setLoginMode(false));
-  document.querySelector("#logout-button").addEventListener("click", async () => {
-    try {
-      await apiRequest("logout", {});
-    } catch (error) {
-      showToast(`Couldn't sign out: ${error.message}`, "error");
-      return;
-    }
-    closeSidebar();
-    window.clearInterval(cloudRefreshTimer);
-    cloudRefreshTimer = 0;
-    document.querySelector("#app-shell").hidden = true;
-    document.querySelector("#login-screen").hidden = false;
-    state.currentAccount = null;
-    document.querySelector("#login-form").reset();
-    document.querySelector("#registration-form").reset();
-    initialPasswordForm.reset();
-    document.querySelector("#login-error").hidden = true;
-    registrationError.hidden = true;
-    initialPasswordError.hidden = true;
-    setLoginMode(false);
-  });
-
-  apiRequest("session").then((result) => {
-    csrfToken = result.csrfToken ?? "";
-    if (result.profile) return enterApplication(result.profile, loginError);
-    return undefined;
-  }).catch((error) => {
-    displayLoginError(loginError, `Couldn't connect to the XAMPP database service: ${error.message}`);
-  });
 }
 
 function initializeApp() {
@@ -2505,6 +2112,11 @@ function initializeApp() {
   document.querySelector("#add-load").addEventListener("click", () => openLoadDialog());
   document.querySelector("#quick-add-load").addEventListener("click", () => openLoadDialog());
   document.querySelector("#sidebar-export").addEventListener("click", exportCsv);
+  document.querySelector("#backup-records").addEventListener("click", exportBackup);
+  document.querySelector("#restore-records").addEventListener("click", () => {
+    document.querySelector("#restore-records-file").click();
+  });
+  document.querySelector("#restore-records-file").addEventListener("change", restoreBackup);
   document.querySelector("#export-loads").addEventListener("click", exportCsv);
   document.querySelector("#print-overview").addEventListener("click", () => window.print());
   document.querySelector("#open-settings").addEventListener("click", openSettingsDialog);
@@ -2521,7 +2133,6 @@ function initializeApp() {
     schoolLogoPreviewUrl = URL.createObjectURL(file);
     updateSchoolLogoPreview(schoolLogoPreviewUrl);
   });
-  document.querySelector("#import-legacy-records").addEventListener("click", importLegacyRecords);
   document.querySelector("#remove-school-logo").addEventListener("click", () => {
     document.querySelector("#setting-school-logo").value = "";
     document.querySelector("#setting-remove-school-logo").checked = true;
@@ -2592,7 +2203,6 @@ function initializeApp() {
     openSettingsDialog();
   });
   document.querySelector("#teacher-form").addEventListener("submit", saveTeacher);
-  document.querySelector("#teacher-password-form").addEventListener("submit", resetTeacherPassword);
   document.querySelector("#load-form").addEventListener("submit", saveLoad);
   document.querySelector("#preview-teacher-load").addEventListener("click", previewTeacherLoads);
   document.querySelector("#load-group-name").addEventListener("change", (event) => {
